@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="需求背景商业软件是使用php语言写的，做excel导出功能的时候使用了PhpSpreadsheet这个库，这个库导出的excel文件与正常的excel文件格式不太一致，所以导致上传xlsx文件并使用市面热门的excel解析库（sheet.js等）解析成json数据时解析失败，最终输出结果为空数组。 123456789101112131415161718&#x2F;&#x2F; 使用sheetjs转换数据export">
+<meta property="og:type" content="article">
+<meta property="og:title" content="sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？">
+<meta property="og:url" content="https://zzoeyh.github.io/2024/12/30/2024/parse-excel/index.html">
+<meta property="og:site_name" content="Zoey&#39;s Blog">
+<meta property="og:description" content="需求背景商业软件是使用php语言写的，做excel导出功能的时候使用了PhpSpreadsheet这个库，这个库导出的excel文件与正常的excel文件格式不太一致，所以导致上传xlsx文件并使用市面热门的excel解析库（sheet.js等）解析成json数据时解析失败，最终输出结果为空数组。 123456789101112131415161718&#x2F;&#x2F; 使用sheetjs转换数据export">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://zzoeyh.github.io/images/parse-excel/1.png">
+<meta property="og:image" content="https://zzoeyh.github.io/images/parse-excel/2.png">
+<meta property="og:image" content="https://zzoeyh.github.io/images/parse-excel/3.png">
+<meta property="og:image" content="https://zzoeyh.github.io/images/parse-excel/4.png">
+<meta property="og:image" content="https://zzoeyh.github.io/images/parse-excel/5.png">
+<meta property="og:image" content="https://zzoeyh.github.io/images/parse-excel/%E6%B5%81%E7%A8%8B%E5%9B%BE.png">
+<meta property="og:image" content="https://zzoeyh.github.io/images/parse-excel/sharedStrings.xml.png">
+<meta property="og:image" content="https://zzoeyh.github.io/images/parse-excel/sharedStrings.xml2.png">
+<meta property="article:published_time" content="2024-12-30T00:00:00.000Z">
+<meta property="article:modified_time" content="2025-01-07T12:49:17.409Z">
+<meta property="article:author" content="Zoey Hong">
+<meta property="article:tag" content="项目">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zzoeyh.github.io/images/parse-excel/1.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/zzoeyh">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2025/01/06/2025/typescript-reference/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2024/12/29/2024/npm-pkg-notice/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&text=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&title=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&is_video=false&description=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？&body=Check out this article: https://zzoeyh.github.io/2024/12/30/2024/parse-excel/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&title=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&title=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&title=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&title=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&name=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&t=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%9C%80%E6%B1%82%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">需求背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A1%A5%E5%85%85%E7%9F%A5%E8%AF%86"><span class="toc-number">2.</span> <span class="toc-text">补充知识</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Excel-Xlsx%E5%B1%85%E7%84%B6%E6%98%AF%E4%B8%80%E4%B8%AA%E5%8E%8B%E7%BC%A9%E5%8C%85%E4%B8%94%E6%94%AF%E6%8C%81%E8%A7%A3%E5%8E%8B%E7%BC%A9"><span class="toc-number">2.1.</span> <span class="toc-text">Excel Xlsx居然是一个压缩包且支持解压缩</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E6%9E%90%E5%A4%B1%E8%B4%A5%E5%8E%9F%E5%9B%A0"><span class="toc-number">2.2.</span> <span class="toc-text">解析失败原因</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.</span> <span class="toc-text">工具实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Excel%E6%96%87%E4%BB%B6%E5%B7%AE%E5%BC%82%E5%AF%B9%E6%AF%94%EF%BC%9A"><span class="toc-number">3.1.</span> <span class="toc-text">Excel文件差异对比：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF%EF%BC%88%E4%BB%A5%E7%AE%80%E5%8D%95%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84%E4%B8%BA%E4%BE%8B%EF%BC%89"><span class="toc-number">3.2.</span> <span class="toc-text">实现思路（以简单文件结构为例）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E8%A7%A3%E5%8E%8B%E7%BC%A9xlsx%E6%96%87%E4%BB%B6"><span class="toc-number">3.2.1.</span> <span class="toc-text">1. 解压缩xlsx文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E8%8E%B7%E5%8F%96%E9%9C%80%E8%A6%81%E8%AF%BB%E5%8F%96%E7%9A%84xml%E6%96%87%E4%BB%B6"><span class="toc-number">3.2.2.</span> <span class="toc-text">2. 获取需要读取的xml文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%86%8D%E8%AF%BB%E5%8F%96xml%E6%96%87%E4%BB%B6%EF%BC%8C%E5%B0%86%E6%A0%87%E7%AD%BE%E6%95%B0%E6%8D%AE%E8%BD%AC%E6%8D%A2%E4%B8%BA%E6%95%B0%E7%BB%84"><span class="toc-number">3.2.3.</span> <span class="toc-text">3. 再读取xml文件，将标签数据转换为数组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%AF%B9%E4%BA%8E%E8%BE%83%E5%A4%8D%E6%9D%82%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84%E7%9A%84%E6%83%85%E5%86%B5"><span class="toc-number">3.2.4.</span> <span class="toc-text">4. 对于较复杂文件结构的情况</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%9D%E8%80%83"><span class="toc-number">4.1.</span> <span class="toc-text">思考</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%90%8E"><span class="toc-number">4.2.</span> <span class="toc-text">最后</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Zoey Hong</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-12-30T00:00:00.000Z" class="dt-published" itemprop="datePublished">2024-12-30</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h1 id="需求背景"><a href="#需求背景" class="headerlink" title="需求背景"></a>需求背景</h1><p>商业软件是使用php语言写的，做excel导出功能的时候使用了PhpSpreadsheet这个库，这个库导出的excel文件与正常的excel文件格式不太一致，所以导致上传xlsx文件并使用市面热门的excel解析库（sheet.js等）解析成json数据时解析失败，最终输出结果为空数组。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用sheetjs转换数据</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">readFile</span> = (<span class="params">file: File</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function">(<span class="params">resolve</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> reader = <span class="keyword">new</span> <span class="title class_">FileReader</span>();</span><br><span class="line">    reader.<span class="title function_">readAsBinaryString</span>(file);</span><br><span class="line">    reader.<span class="property">onload</span> = <span class="function">(<span class="params">ev</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="title function_">resolve</span>(ev.<span class="property">target</span>.<span class="property">result</span>);</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">let</span> dataBinary = <span class="keyword">await</span> <span class="title function_">readFile</span>(file);</span><br><span class="line"><span class="keyword">let</span> workBook = <span class="variable constant_">XLSX</span>.<span class="title function_">read</span>(dataBinary, &#123; <span class="attr">type</span>: <span class="string">&quot;binary&quot;</span> &#125;);</span><br><span class="line"><span class="keyword">let</span> workSheet = workBook.<span class="property">Sheets</span>[workBook.<span class="property">SheetNames</span>[<span class="number">0</span>]];</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> data = <span class="variable constant_">XLSX</span>.<span class="property">utils</span>.<span class="title function_">sheet_to_json</span>(workSheet, &#123;</span><br><span class="line">    <span class="attr">header</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">defval</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">  &#125;);</span><br></pre></td></tr></table></figure>
+
+<h1 id="补充知识"><a href="#补充知识" class="headerlink" title="补充知识"></a>补充知识</h1><h2 id="Excel-Xlsx居然是一个压缩包且支持解压缩"><a href="#Excel-Xlsx居然是一个压缩包且支持解压缩" class="headerlink" title="Excel Xlsx居然是一个压缩包且支持解压缩"></a>Excel Xlsx居然是一个压缩包且支持解压缩</h2><p>2007年后的Office的文件后缀都多了一个x，分别为xlsx、docx、pptx，它们本质是一个压缩包。<br>对于xlsx来说，构成xlsx文件的都在这个压缩包里，包含了许多xml文件。<br>Excel似乎对内部文件结构做了一定的优化，解压缩后可能出现两种文件结构。</p>
+<ul>
+<li>当文件列较少，内容较少时，文件结构如下：<br><img src="/images/parse-excel/1.png"></li>
+</ul>
+<p>与单元格数据相关的文件是worksheets文件夹下的sheet1.xml</p>
+<p>注：worksheets文件夹下有sheet1.xml和sheet2.xml这两个文件，但内容是一致的，只关注其中一个即可。</p>
+<p><img src="/images/parse-excel/2.png"></p>
+<ul>
+<li>较复杂时，文件结构如下:</li>
+</ul>
+<p><img src="/images/parse-excel/3.png"></p>
+<p>与单元格数据相关是xl文件夹下的sharedStrings.xml和worksheets文件夹下的sheet1.xml</p>
+<p>sheet1.xml</p>
+<p><img src="/images/parse-excel/4.png"></p>
+<p>sharedStrings.xml</p>
+<p><img src="/images/parse-excel/5.png"></p>
+<p>这两个xml文件用可视化工具解析后的结构都比较复杂，总的来说sheet1维护的是excel表格的行列数据，</p>
+<p>sharedStrings.xml维护的是每个单元格的具体内容。</p>
+<h2 id="解析失败原因"><a href="#解析失败原因" class="headerlink" title="解析失败原因"></a>解析失败原因</h2><p><img src="/images/parse-excel/%E6%B5%81%E7%A8%8B%E5%9B%BE.png"></p>
+<p>因为Excel文件是可以打开的，证明数据正常。更换解析库后仍然无法对xlsx文件进行解析，因此可以初步判断为市面目前的解析库大部分不支持解析这种格式的xlsx文件。</p>
+<h1 id="工具实现"><a href="#工具实现" class="headerlink" title="工具实现"></a>工具实现</h1><p>难道这个文件真的无法被读取吗？</p>
+<p>已知xlsx文件可以解压缩，因此可以尝试通过读取解压缩的文件来获取xlsx文件数据。</p>
+<h2 id="Excel文件差异对比："><a href="#Excel文件差异对比：" class="headerlink" title="Excel文件差异对比："></a>Excel文件差异对比：</h2><p>正常导出的：</p>
+<p><img src="/images/parse-excel/sharedStrings.xml.png"></p>
+<p>PhpSpreadsheet导出的：</p>
+<p><img src="/images/parse-excel/sharedStrings.xml2.png"></p>
+<p>可以观察到PhpSpreadsheet导出的文件比正常的文件的xml标签多了一个x: 前缀，且标签内相关样式的表现形式也不太一致，猜测是因为这个差异才导致无法解析。</p>
+<h2 id="实现思路（以简单文件结构为例）"><a href="#实现思路（以简单文件结构为例）" class="headerlink" title="实现思路（以简单文件结构为例）"></a>实现思路（以简单文件结构为例）</h2><h3 id="1-解压缩xlsx文件"><a href="#1-解压缩xlsx文件" class="headerlink" title="1. 解压缩xlsx文件"></a>1. 解压缩xlsx文件</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> zip = <span class="keyword">new</span> <span class="title class_">JSZip</span>();</span><br><span class="line"><span class="keyword">const</span> zipData = <span class="keyword">await</span> zip.<span class="title function_">loadAsync</span>(file);</span><br><span class="line"><span class="keyword">const</span> &#123; <span class="attr">files</span>: zipDataFiles &#125; = zipData;</span><br></pre></td></tr></table></figure>
+<h3 id="2-获取需要读取的xml文件"><a href="#2-获取需要读取的xml文件" class="headerlink" title="2. 获取需要读取的xml文件"></a>2. 获取需要读取的xml文件</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">extractFileFromZip</span>(<span class="params">zipDataFiles, path</span>) &#123;</span><br><span class="line"><span class="keyword">if</span> (zipDataFiles[path]) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">await</span> zipDataFiles[path].<span class="title function_">async</span>(<span class="string">&quot;text&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> sheet1Xml = <span class="keyword">await</span> <span class="title function_">extractFileFromZip</span>(</span><br><span class="line">  zipDataFiles,</span><br><span class="line">  <span class="string">&quot;xl/worksheets/sheet1.xml&quot;</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-再读取xml文件，将标签数据转换为数组"><a href="#3-再读取xml文件，将标签数据转换为数组" class="headerlink" title="3. 再读取xml文件，将标签数据转换为数组"></a>3. 再读取xml文件，将标签数据转换为数组</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">parseXmlFile</span>(<span class="params">xml: string</span>): string[][] &#123;</span><br><span class="line">  <span class="keyword">const</span> parser = <span class="keyword">new</span> <span class="title class_">DOMParser</span>();</span><br><span class="line">  <span class="keyword">const</span> xmlDoc = parser.<span class="title function_">parseFromString</span>(xml, <span class="string">&quot;application/xml&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> rows = xmlDoc.<span class="title function_">getElementsByTagName</span>(<span class="string">&quot;row&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> <span class="attr">data</span>: string[][] = [];</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; rows.<span class="property">length</span>; i++) &#123;</span><br><span class="line">    <span class="keyword">const</span> row = rows[i];</span><br><span class="line">    <span class="keyword">const</span> cells = row.<span class="title function_">getElementsByTagName</span>(<span class="string">&quot;c&quot;</span>);</span><br><span class="line">    <span class="keyword">const</span> <span class="attr">rowData</span>: string[] = [];</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> j = <span class="number">0</span>; j &lt; cells.<span class="property">length</span>; j++) &#123;</span><br><span class="line">      <span class="keyword">const</span> cell = cells[j];</span><br><span class="line">      <span class="keyword">const</span> valueElement = cell.<span class="title function_">getElementsByTagName</span>(<span class="string">&quot;v&quot;</span>)[<span class="number">0</span>];</span><br><span class="line">      <span class="keyword">const</span> value = valueElement ? valueElement.<span class="property">textContent</span> : <span class="string">&quot;&quot;</span>;</span><br><span class="line">      rowData.<span class="title function_">push</span>(value);</span><br><span class="line">    &#125;</span><br><span class="line">    data.<span class="title function_">push</span>(rowData);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> data;</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">parseXmlFile</span>(sheet1Xml)</span><br></pre></td></tr></table></figure>
+<p>通过这个方式就可以把xlsx文件转换为我们想要的json数据了。</p>
+<h3 id="4-对于较复杂文件结构的情况"><a href="#4-对于较复杂文件结构的情况" class="headerlink" title="4. 对于较复杂文件结构的情况"></a>4. 对于较复杂文件结构的情况</h3><p>需要读取<code>sheet1.xml</code>和<code>sharedStrings.xml</code>分别获取行列信息以及字符信息，再对数据进行组合处理，才能够获取到我们想要的json数据。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> sharedStringsXml = <span class="keyword">await</span> <span class="title function_">extractFileFromZip</span>(zipDataFiles, <span class="string">&quot;xl/sharedStrings.xml&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">parseSharedStrings</span>(<span class="params">xml: string, namespaceURI: string</span>): string[] &#123;</span><br><span class="line">  <span class="keyword">const</span> parser = <span class="keyword">new</span> <span class="title class_">DOMParser</span>();</span><br><span class="line">  <span class="keyword">const</span> doc = parser.<span class="title function_">parseFromString</span>(xml, <span class="string">&quot;application/xml&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> siElements = doc.<span class="title function_">getElementsByTagNameNS</span>(namespaceURI, <span class="string">&quot;si&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (siElements.<span class="property">length</span> === <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&quot;No &lt;si&gt; elements found in sharedStringsXml&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> <span class="attr">strings</span>: string[] = [];</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; siElements.<span class="property">length</span>; i++) &#123;</span><br><span class="line">    <span class="keyword">const</span> si = siElements[i];</span><br><span class="line">    <span class="keyword">let</span> textContent = <span class="string">&quot;&quot;</span>;</span><br><span class="line">    <span class="keyword">const</span> tElements = si.<span class="title function_">getElementsByTagNameNS</span>(namespaceURI, <span class="string">&quot;t&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> j = <span class="number">0</span>; j &lt; tElements.<span class="property">length</span>; j++) &#123;</span><br><span class="line">      <span class="keyword">const</span> t = tElements[j];</span><br><span class="line">      textContent += t.<span class="property">textContent</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    strings.<span class="title function_">push</span>(textContent);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> strings;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">parseWorksheet</span>(<span class="params"></span></span><br><span class="line"><span class="params">    xml: string,</span></span><br><span class="line"><span class="params">    sharedStrings: string[],</span></span><br><span class="line"><span class="params">    namespaceURI: string</span></span><br><span class="line"><span class="params">  </span>): &#123; [<span class="attr">cellRef</span>: string]: string | number &#125;[] &#123; <span class="comment">// 修改为支持数字类型</span></span><br><span class="line">    <span class="keyword">const</span> parser = <span class="keyword">new</span> <span class="title class_">DOMParser</span>();</span><br><span class="line">    <span class="keyword">const</span> doc = parser.<span class="title function_">parseFromString</span>(xml, <span class="string">&quot;application/xml&quot;</span>);</span><br><span class="line">    <span class="keyword">const</span> rowElements = doc.<span class="title function_">getElementsByTagNameNS</span>(namespaceURI, <span class="string">&quot;row&quot;</span>);</span><br><span class="line">    <span class="keyword">const</span> <span class="attr">data</span>: &#123; [<span class="attr">cellRef</span>: string]: string | number &#125;[] = [];</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; rowElements.<span class="property">length</span>; i++) &#123;</span><br><span class="line">      <span class="keyword">const</span> row = rowElements[i];</span><br><span class="line">      <span class="keyword">const</span> <span class="attr">rowData</span>: &#123; [<span class="attr">cellRef</span>: string]: string | number &#125; = &#123;&#125;;</span><br><span class="line">      <span class="keyword">const</span> cellElements = row.<span class="title function_">getElementsByTagNameNS</span>(namespaceURI, <span class="string">&quot;c&quot;</span>);</span><br><span class="line">  </span><br><span class="line">      <span class="keyword">for</span> (<span class="keyword">let</span> j = <span class="number">0</span>; j &lt; cellElements.<span class="property">length</span>; j++) &#123;</span><br><span class="line">        <span class="keyword">const</span> cell = cellElements[j];</span><br><span class="line">        <span class="keyword">const</span> cellRef = cell.<span class="title function_">getAttribute</span>(<span class="string">&quot;r&quot;</span>);</span><br><span class="line">        <span class="keyword">const</span> valueElement = cell.<span class="title function_">getElementsByTagNameNS</span>(namespaceURI, <span class="string">&quot;v&quot;</span>)[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">let</span> cellValue = valueElement ? valueElement.<span class="property">textContent</span> : <span class="string">&quot;&quot;</span>;</span><br><span class="line">  </span><br><span class="line">        <span class="comment">// 处理共享字符串</span></span><br><span class="line">        <span class="keyword">if</span> (cell.<span class="title function_">getAttribute</span>(<span class="string">&quot;t&quot;</span>) === <span class="string">&quot;s&quot;</span>) &#123;</span><br><span class="line">          cellValue = sharedStrings[<span class="built_in">parseInt</span>(cellValue, <span class="number">10</span>)];</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="comment">// 尝试将值转换为数字，如果不能，则保持为字符串</span></span><br><span class="line">          <span class="keyword">const</span> numericValue = <span class="built_in">parseFloat</span>(cellValue);</span><br><span class="line">          <span class="keyword">if</span> (!<span class="built_in">isNaN</span>(numericValue)) &#123;</span><br><span class="line">            cellValue = numericValue; <span class="comment">// 如果是数字，则保持为数字</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">  </span><br><span class="line">        rowData[cellRef] = cellValue;</span><br><span class="line">      &#125;</span><br><span class="line">  </span><br><span class="line">      data.<span class="title function_">push</span>(rowData);</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">return</span> data;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> sharedStrings = <span class="title function_">parseSharedStrings</span>(sharedStringsXml, namespaceURI);</span><br><span class="line"><span class="keyword">const</span> data = <span class="title function_">parseWorksheet</span>(sheet1Xml, sharedStrings, namespaceURI);</span><br><span class="line"><span class="comment">// 输出：</span></span><br><span class="line"><span class="comment">// [</span></span><br><span class="line"><span class="comment">//   &#123; A1: &#x27;Hello&#x27;, B1: &#x27;World&#x27; &#125;,</span></span><br><span class="line"><span class="comment">//   &#123; A2: &#x27;Alice&#x27;, B2: &#x27;30&#x27; &#125;,</span></span><br><span class="line"><span class="comment">//   &#123; A3: &#x27;Bob&#x27;, B3: &#x27;25&#x27; &#125;</span></span><br><span class="line"><span class="comment">// ]</span></span><br><span class="line"><span class="comment">// key: 字母代表Excel中的列，数字则代表行</span></span><br><span class="line"><span class="comment">// value: 对应单元格的内容</span></span><br></pre></td></tr></table></figure>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总体实现思路为针对xlsx文件特性对其解压缩并找出文件规律，对xml文件标签信息进行解析获取xlsx单元格对应的数据信息。目前只实现了简单的读取功能，转换后的数据结构与使用sheet.js的sheet_to_json函数一致。</p>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><ul>
+<li><p>关于excel的文件结构尚且没有找到相关的文档来证实其内部不同的文件结构的边界，因此只能同时对两种文件进行兼容。</p>
+</li>
+<li><p>市面上能导出这类“奇特”格式的xlsx文件较少，可测试case不多，直至目前测试成功率为100%。</p>
+</li>
+</ul>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>工具相关npm包已发布，<a target="_blank" rel="noopener" href="https://www.npmjs.com/package/@turtlegi/parse-excel">https://www.npmjs.com/package/@turtlegi/parse-excel</a></p>
+<p>完整代码已开源，如果您觉得有用，可以帮忙点个star鼓励下我～<br><a target="_blank" rel="noopener" href="https://github.com/zzoeyh/parse-excel">https://github.com/zzoeyh/parse-excel</a></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/zzoeyh">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%9C%80%E6%B1%82%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">需求背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A1%A5%E5%85%85%E7%9F%A5%E8%AF%86"><span class="toc-number">2.</span> <span class="toc-text">补充知识</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Excel-Xlsx%E5%B1%85%E7%84%B6%E6%98%AF%E4%B8%80%E4%B8%AA%E5%8E%8B%E7%BC%A9%E5%8C%85%E4%B8%94%E6%94%AF%E6%8C%81%E8%A7%A3%E5%8E%8B%E7%BC%A9"><span class="toc-number">2.1.</span> <span class="toc-text">Excel Xlsx居然是一个压缩包且支持解压缩</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E6%9E%90%E5%A4%B1%E8%B4%A5%E5%8E%9F%E5%9B%A0"><span class="toc-number">2.2.</span> <span class="toc-text">解析失败原因</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.</span> <span class="toc-text">工具实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Excel%E6%96%87%E4%BB%B6%E5%B7%AE%E5%BC%82%E5%AF%B9%E6%AF%94%EF%BC%9A"><span class="toc-number">3.1.</span> <span class="toc-text">Excel文件差异对比：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF%EF%BC%88%E4%BB%A5%E7%AE%80%E5%8D%95%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84%E4%B8%BA%E4%BE%8B%EF%BC%89"><span class="toc-number">3.2.</span> <span class="toc-text">实现思路（以简单文件结构为例）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E8%A7%A3%E5%8E%8B%E7%BC%A9xlsx%E6%96%87%E4%BB%B6"><span class="toc-number">3.2.1.</span> <span class="toc-text">1. 解压缩xlsx文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E8%8E%B7%E5%8F%96%E9%9C%80%E8%A6%81%E8%AF%BB%E5%8F%96%E7%9A%84xml%E6%96%87%E4%BB%B6"><span class="toc-number">3.2.2.</span> <span class="toc-text">2. 获取需要读取的xml文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%86%8D%E8%AF%BB%E5%8F%96xml%E6%96%87%E4%BB%B6%EF%BC%8C%E5%B0%86%E6%A0%87%E7%AD%BE%E6%95%B0%E6%8D%AE%E8%BD%AC%E6%8D%A2%E4%B8%BA%E6%95%B0%E7%BB%84"><span class="toc-number">3.2.3.</span> <span class="toc-text">3. 再读取xml文件，将标签数据转换为数组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%AF%B9%E4%BA%8E%E8%BE%83%E5%A4%8D%E6%9D%82%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84%E7%9A%84%E6%83%85%E5%86%B5"><span class="toc-number">3.2.4.</span> <span class="toc-text">4. 对于较复杂文件结构的情况</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%9D%E8%80%83"><span class="toc-number">4.1.</span> <span class="toc-text">思考</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%90%8E"><span class="toc-number">4.2.</span> <span class="toc-text">最后</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&text=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&title=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&is_video=false&description=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？&body=Check out this article: https://zzoeyh.github.io/2024/12/30/2024/parse-excel/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&title=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&title=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&title=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&title=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&name=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://zzoeyh.github.io/2024/12/30/2024/parse-excel/&t=sheet.js无法解析？如何从0到1写一个解析xlsx文件的工具？"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    Zoey Hong
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/zzoeyh">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

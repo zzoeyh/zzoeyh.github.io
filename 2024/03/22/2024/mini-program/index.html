@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="小程序的设计要考虑安全和性能 如果使用纯native实现纯native实现可以理解为把小程序当成app来实现，使用底层语言或平台特定的语言（如C、C++、汇编语言）编写的代码，这些代码直接在特定硬件或操作系统上执行，而不需要通过中间层或解释器进行转换。这种实现方式通常称为”native code”。 小程序的宿主是微信，如果使用纯 Native 实现，那么小程序的版本更新必须依赖微信，跟微信的代码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="小程序为什么要设计成双线程">
+<meta property="og:url" content="https://zzoeyh.github.io/2024/03/22/2024/mini-program/index.html">
+<meta property="og:site_name" content="Zoey&#39;s Blog">
+<meta property="og:description" content="小程序的设计要考虑安全和性能 如果使用纯native实现纯native实现可以理解为把小程序当成app来实现，使用底层语言或平台特定的语言（如C、C++、汇编语言）编写的代码，这些代码直接在特定硬件或操作系统上执行，而不需要通过中间层或解释器进行转换。这种实现方式通常称为”native code”。 小程序的宿主是微信，如果使用纯 Native 实现，那么小程序的版本更新必须依赖微信，跟微信的代码">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://zzoeyh.github.io/images/mini-program/data-events.png">
+<meta property="article:published_time" content="2024-03-22T00:00:00.000Z">
+<meta property="article:modified_time" content="2025-01-07T12:49:17.409Z">
+<meta property="article:author" content="Zoey Hong">
+<meta property="article:tag" content="框架">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zzoeyh.github.io/images/mini-program/data-events.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>小程序为什么要设计成双线程</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/zzoeyh">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2024/03/23/2024/hooks-vue-react/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2024/03/15/2024/new-objcreate/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://zzoeyh.github.io/2024/03/22/2024/mini-program/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&text=小程序为什么要设计成双线程"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&title=小程序为什么要设计成双线程"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&is_video=false&description=小程序为什么要设计成双线程"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=小程序为什么要设计成双线程&body=Check out this article: https://zzoeyh.github.io/2024/03/22/2024/mini-program/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&title=小程序为什么要设计成双线程"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&title=小程序为什么要设计成双线程"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&title=小程序为什么要设计成双线程"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&title=小程序为什么要设计成双线程"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&name=小程序为什么要设计成双线程&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&t=小程序为什么要设计成双线程"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E6%9E%9C%E4%BD%BF%E7%94%A8%E7%BA%AFnative%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.</span> <span class="toc-text">如果使用纯native实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E6%9E%9C%E4%BD%BF%E7%94%A8%E7%BA%AFWeb%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">如果使用纯Web实现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AF%B9%E6%AF%94%E6%B5%8F%E8%A7%88%E5%99%A8%E7%8E%AF%E5%A2%83"><span class="toc-number">2.1.</span> <span class="toc-text">对比浏览器环境</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-%E6%B8%B2%E6%9F%93%E7%BA%BF%E7%A8%8B%E4%B8%8E-JavaScript-%E5%BC%95%E6%93%8E%E7%BA%BF%E7%A8%8B%E6%98%AF%E4%BA%92%E6%96%A5%E7%9A%84%EF%BC%88%E6%80%A7%E8%83%BD%EF%BC%89"><span class="toc-number">2.1.1.</span> <span class="toc-text">为什么 渲染线程与 JavaScript 引擎线程是互斥的（性能）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E4%BD%BF%E7%94%A8%E6%B8%B2%E6%9F%93%E7%BA%BF%E7%A8%8B-WebWorker"><span class="toc-number">2.1.2.</span> <span class="toc-text">为什么不使用渲染线程+WebWorker</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%A8%8B%E5%BA%8F%E5%8F%8C%E7%BA%BF%E7%A8%8B"><span class="toc-number"></span> <span class="toc-text">小程序双线程</span></a>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        小程序为什么要设计成双线程
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Zoey Hong</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-03-22T00:00:00.000Z" class="dt-published" itemprop="datePublished">2024-03-22</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/%E5%B0%8F%E7%A8%8B%E5%BA%8F/">小程序</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E6%A1%86%E6%9E%B6/" rel="tag">框架</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>小程序的设计要考虑<strong>安全</strong>和<strong>性能</strong></p>
+<h3 id="如果使用纯native实现"><a href="#如果使用纯native实现" class="headerlink" title="如果使用纯native实现"></a>如果使用纯native实现</h3><p>纯native实现可以理解为把小程序当成app来实现，使用底层语言或平台特定的语言（如C、C++、汇编语言）编写的代码，这些代码直接在特定硬件或操作系统上执行，而不需要通过中间层或解释器进行转换。这种实现方式通常称为”native code”。</p>
+<p>小程序的宿主是微信，如果使用纯 Native 实现，那么小程序的版本更新必须依赖微信，跟微信的代码一起发版，这样肯定是不行的。</p>
+<h3 id="如果使用纯Web实现"><a href="#如果使用纯Web实现" class="headerlink" title="如果使用纯Web实现"></a>如果使用纯Web实现</h3><p>如果是纯 Web 实现，安全和性能就很难得到保障。 小程序需要既能够像 Web 一样将资源托管在云端，更新独立；同时又能够保证足够好的安全性和性能。</p>
+<h4 id="对比浏览器环境"><a href="#对比浏览器环境" class="headerlink" title="对比浏览器环境"></a>对比浏览器环境</h4><p>浏览器的处理 GUI 渲染线程和 JavaScript 逻辑脚本线程上用了<strong>互斥、阻塞</strong>的管理模式</p>
+<h5 id="为什么-渲染线程与-JavaScript-引擎线程是互斥的（性能）"><a href="#为什么-渲染线程与-JavaScript-引擎线程是互斥的（性能）" class="headerlink" title="为什么 渲染线程与 JavaScript 引擎线程是互斥的（性能）"></a>为什么 渲染线程与 JavaScript 引擎线程是互斥的（性能）</h5><p>当 JavaScript 代码被执行时，GUI 渲染线程会被挂起，等待 JavaScript 引擎线程空闲时再被执行，以免在渲染期间被 JavaScript 重复地修改 DOM 造成不必要的渲染压力。采用互斥的模式等待 JavaScript 代码执行完毕后，可以保证渲染是最终的执行结果。所以浏览器的空闲（Idle）时长也成了衡量网站性能的重要指标之一，空闲时长多代表 JavaScript 逻辑不密集以及 DOM改动频率低，这种情况下浏览器可以更快速顺畅地响应用户的交互行为</p>
+<p>tip： React Fiber就是利用idle时间进行分片任务处理。 </p>
+<p>总结：渲染线程和逻辑线程（js引擎线程）是互斥的，<strong>因为js代码有修改dom的权限</strong>，如果是并行的话很难知道是哪个线程对dom进行了操作。</p>
+<h5 id="为什么不使用渲染线程-WebWorker"><a href="#为什么不使用渲染线程-WebWorker" class="headerlink" title="为什么不使用渲染线程+WebWorker"></a>为什么不使用渲染线程+WebWorker</h5><p>HTML5 引入了 Web Worker，提供多线程执行 JavaScript 代码的能力，但是与其他编程语言不同的是，<strong>Worker 线程与主线程并不是平行的</strong>，而是一种<strong>主从（ Master-Slave）多线程模型</strong>。</p>
+<p>JavaScript 代码无法获取 Window 和 Document 对象，也就无法操作 DOM。除此之外，由于 Worker 的线程安全特性，Worker 内的代码运行过程中不会阻塞外层的 GUI 渲染线程，两者可以并行。</p>
+<p>但是这个模型存在比较严重的性能问题，Web Worker 非常耗费资源，除去计算消耗以外，与主线程的通信过程对性能的损耗也非常严重。</p>
+<h2 id="小程序双线程"><a href="#小程序双线程" class="headerlink" title="小程序双线程"></a>小程序双线程</h2><p>最终小程序采用了一种混合的架构模式：<strong>使用 Webview 渲染 UI、使用类似Web Worker 的独立线程运行逻辑，</strong>这就是双线程模型</p>
+<p>逻辑层的JS代码全部载入到一个Webview里面，称之为<strong>AppService</strong>，<strong>整个小程序仅仅有一个</strong>，而且整个生命周期常驻内存；</p>
+<p>而全部的视图（wxml和wxss）都是单独的Webview来承载，称之为AppView。</p>
+<ol>
+<li>渲染层（WXML、WXSS文件）和数据相关。即：怎样<strong>表现数据</strong></li>
+<li>逻辑层（js文件）负责<strong>产生、处理数据</strong>。即：什么样的数据</li>
+</ol>
+<p>渲染线程使用 Webview 进行 UI 的渲染呈现。Webview 是一个完整的类浏览器运行环境，本身具备运行 JavaScript 的能力，但是小程序并不是将逻辑脚本放到 Webview 中运行，而是将逻辑层独立为一个与 Webview 平行的线程，<strong>使用客户端提供的 JavaScript 引擎运行代码</strong>，iOS 的JavaScriptCore、安卓是腾讯 X5 内核提供的 JsCore 环境以及 IDE 工具的 nwjs 。</p>
+<p>逻辑线程是一个只能够运行 JavaScript 的沙箱环境，不提供 DOM 操作相关的 API，所以不能直接操作 UI，只能够通过 setData 更新数据的方式异步更新 UI。</p>
+<p>与 Vue&#x2F;React 不同的是，小程序的渲染层与逻辑层之间的通信并不是在两者之间直接传递数据或事件，而是<strong>由 Native 作为中间媒介进行转发</strong>。</p>
+<p><img src="/images/mini-program/data-events.png"></p>
+<ul>
+<li>渲染层（也可以称为视图层）通过与用户的交互触发特定的事件 event； </li>
+<li>然后 event 被传递给逻辑层； </li>
+<li>逻辑层继而通过一系列的逻辑处理、数据请求、接口调用等行为将加工好的数据 data 传递给渲染层； </li>
+<li>最后渲染层将 data 渲染为可视化的 UI。</li>
+</ul>
+<p>总结：小程序的双线程架构可以充分利用微信的优势，让jssdk早已随微信客户端内置到微信中，打开小程序时直接从native层注入到视图层。不仅让包的体积变小，还减少了网络请求。当然不仅注入了sdk，还有基础库什么的。并且还有一个好处就是保证了充分的安全性，因为传统的h5形式的网页，用户是可以直接操作dom的，但是小程序是提供的沙箱环境，并且不会提供浏览器的api，只提供js执行环境，界面的渲染全部在webview中进行。当然这样的架构也会造成视图层和逻辑层交互延迟，如果频繁的进行数据交互会有性能问题。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/zzoeyh">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E6%9E%9C%E4%BD%BF%E7%94%A8%E7%BA%AFnative%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.</span> <span class="toc-text">如果使用纯native实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E6%9E%9C%E4%BD%BF%E7%94%A8%E7%BA%AFWeb%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">如果使用纯Web实现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AF%B9%E6%AF%94%E6%B5%8F%E8%A7%88%E5%99%A8%E7%8E%AF%E5%A2%83"><span class="toc-number">2.1.</span> <span class="toc-text">对比浏览器环境</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-%E6%B8%B2%E6%9F%93%E7%BA%BF%E7%A8%8B%E4%B8%8E-JavaScript-%E5%BC%95%E6%93%8E%E7%BA%BF%E7%A8%8B%E6%98%AF%E4%BA%92%E6%96%A5%E7%9A%84%EF%BC%88%E6%80%A7%E8%83%BD%EF%BC%89"><span class="toc-number">2.1.1.</span> <span class="toc-text">为什么 渲染线程与 JavaScript 引擎线程是互斥的（性能）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E4%BD%BF%E7%94%A8%E6%B8%B2%E6%9F%93%E7%BA%BF%E7%A8%8B-WebWorker"><span class="toc-number">2.1.2.</span> <span class="toc-text">为什么不使用渲染线程+WebWorker</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%A8%8B%E5%BA%8F%E5%8F%8C%E7%BA%BF%E7%A8%8B"><span class="toc-number"></span> <span class="toc-text">小程序双线程</span></a>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://zzoeyh.github.io/2024/03/22/2024/mini-program/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&text=小程序为什么要设计成双线程"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&title=小程序为什么要设计成双线程"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&is_video=false&description=小程序为什么要设计成双线程"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=小程序为什么要设计成双线程&body=Check out this article: https://zzoeyh.github.io/2024/03/22/2024/mini-program/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&title=小程序为什么要设计成双线程"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&title=小程序为什么要设计成双线程"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&title=小程序为什么要设计成双线程"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&title=小程序为什么要设计成双线程"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&name=小程序为什么要设计成双线程&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://zzoeyh.github.io/2024/03/22/2024/mini-program/&t=小程序为什么要设计成双线程"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    Zoey Hong
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/zzoeyh">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

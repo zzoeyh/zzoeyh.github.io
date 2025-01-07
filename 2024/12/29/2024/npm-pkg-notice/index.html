@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="创建并初始化项目 在终端中创建一个新的文件夹，进入该文件夹。12mkdir my-npm-packagecd my-npm-package 使用 npm init 命令来初始化 package.json 文件。1npm init  编写源代码并配置开发工具配置开发相关依赖1. TypeScript（可选，如果需要使用 TypeScript）安装相关依赖1npm install typescript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从0到1开发并发布一个npm包的流程以及注意事项">
+<meta property="og:url" content="https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/index.html">
+<meta property="og:site_name" content="Zoey&#39;s Blog">
+<meta property="og:description" content="创建并初始化项目 在终端中创建一个新的文件夹，进入该文件夹。12mkdir my-npm-packagecd my-npm-package 使用 npm init 命令来初始化 package.json 文件。1npm init  编写源代码并配置开发工具配置开发相关依赖1. TypeScript（可选，如果需要使用 TypeScript）安装相关依赖1npm install typescript">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-12-29T00:00:00.000Z">
+<meta property="article:modified_time" content="2025-01-07T12:49:17.409Z">
+<meta property="article:author" content="Zoey Hong">
+<meta property="article:tag" content="前端工程化">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>从0到1开发并发布一个npm包的流程以及注意事项</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/zzoeyh">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2024/12/30/2024/parse-excel/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2024/03/23/2024/hooks-vue-react/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&text=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&title=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&is_video=false&description=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=从0到1开发并发布一个npm包的流程以及注意事项&body=Check out this article: https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&title=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&title=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&title=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&title=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&name=从0到1开发并发布一个npm包的流程以及注意事项&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&t=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E5%B9%B6%E5%88%9D%E5%A7%8B%E5%8C%96%E9%A1%B9%E7%9B%AE"><span class="toc-number">1.</span> <span class="toc-text">创建并初始化项目</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BC%96%E5%86%99%E6%BA%90%E4%BB%A3%E7%A0%81%E5%B9%B6%E9%85%8D%E7%BD%AE%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7"><span class="toc-number">2.</span> <span class="toc-text">编写源代码并配置开发工具</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E5%BC%80%E5%8F%91%E7%9B%B8%E5%85%B3%E4%BE%9D%E8%B5%96"><span class="toc-number">2.1.</span> <span class="toc-text">配置开发相关依赖</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-TypeScript%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%8C%E5%A6%82%E6%9E%9C%E9%9C%80%E8%A6%81%E4%BD%BF%E7%94%A8-TypeScript%EF%BC%89"><span class="toc-number">2.1.1.</span> <span class="toc-text">1. TypeScript（可选，如果需要使用 TypeScript）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E7%9B%B8%E5%85%B3%E4%BE%9D%E8%B5%96"><span class="toc-number">2.1.1.1.</span> <span class="toc-text">安装相关依赖</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEtsconfig"><span class="toc-number">2.1.1.2.</span> <span class="toc-text">配置tsconfig</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-ESLint%EF%BC%88%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83%E6%A3%80%E6%9F%A5%EF%BC%89"><span class="toc-number">2.1.2.</span> <span class="toc-text">2. ESLint（代码规范检查）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96"><span class="toc-number">2.1.2.1.</span> <span class="toc-text">安装依赖</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEeslint-config-js"><span class="toc-number">2.1.2.2.</span> <span class="toc-text">配置eslint.config.js</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Rollup-%E9%85%8D%E7%BD%AE%EF%BC%88%E6%89%93%E5%8C%85%E5%B7%A5%E5%85%B7%EF%BC%89"><span class="toc-number">2.1.3.</span> <span class="toc-text">3. Rollup 配置（打包工具）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85rollup%E7%9B%B8%E5%85%B3%E4%BE%9D%E8%B5%96"><span class="toc-number">2.1.3.1.</span> <span class="toc-text">安装rollup相关依赖</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AErollup"><span class="toc-number">2.1.3.2.</span> <span class="toc-text">配置rollup</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Jest%EF%BC%88%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%EF%BC%89"><span class="toc-number">2.1.4.</span> <span class="toc-text">4. Jest（单元测试）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-Jest%EF%BC%9A"><span class="toc-number">2.1.4.1.</span> <span class="toc-text">安装 Jest：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E5%86%99%E5%8C%85%E7%9A%84%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81"><span class="toc-number">2.2.</span> <span class="toc-text">编写包的核心代码</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%93%E5%8C%85%E5%B9%B6%E7%94%9F%E6%88%90%E7%B1%BB%E5%9E%8B%E5%A3%B0%E6%98%8E%E6%96%87%E4%BB%B6"><span class="toc-number">3.</span> <span class="toc-text">打包并生成类型声明文件</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE-package-json%EF%BC%8C%E5%87%86%E5%A4%87%E5%8F%91%E5%B8%83"><span class="toc-number">4.</span> <span class="toc-text">配置 package.json，准备发布</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%AF%E4%BE%9B%E5%8F%82%E8%80%83%E7%9A%84package-json%E9%85%8D%E7%BD%AE"><span class="toc-number">4.1.</span> <span class="toc-text">可供参考的package.json配置</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%91%E5%B8%83%E5%8C%85%E5%88%B0-npm-registry"><span class="toc-number">5.</span> <span class="toc-text">发布包到 npm registry</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A0%B9%E6%8D%AE%E9%9C%80%E6%B1%82%E6%9B%B4%E6%96%B0%E7%89%88%E6%9C%AC%E5%B9%B6%E7%BB%A7%E7%BB%AD%E5%8F%91%E5%B8%83%E6%9B%B4%E6%96%B0"><span class="toc-number">6.</span> <span class="toc-text">根据需求更新版本并继续发布更新</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        从0到1开发并发布一个npm包的流程以及注意事项
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Zoey Hong</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-12-29T00:00:00.000Z" class="dt-published" itemprop="datePublished">2024-12-29</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%8C%96/">前端工程化</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%8C%96/" rel="tag">前端工程化</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h1 id="创建并初始化项目"><a href="#创建并初始化项目" class="headerlink" title="创建并初始化项目"></a>创建并初始化项目</h1><ol>
+<li>在终端中创建一个新的文件夹，进入该文件夹。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> my-npm-package</span><br><span class="line"><span class="built_in">cd</span> my-npm-package</span><br></pre></td></tr></table></figure></li>
+<li>使用 npm init 命令来初始化 package.json 文件。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm init</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h1 id="编写源代码并配置开发工具"><a href="#编写源代码并配置开发工具" class="headerlink" title="编写源代码并配置开发工具"></a>编写源代码并配置开发工具</h1><h2 id="配置开发相关依赖"><a href="#配置开发相关依赖" class="headerlink" title="配置开发相关依赖"></a>配置开发相关依赖</h2><h3 id="1-TypeScript（可选，如果需要使用-TypeScript）"><a href="#1-TypeScript（可选，如果需要使用-TypeScript）" class="headerlink" title="1. TypeScript（可选，如果需要使用 TypeScript）"></a>1. TypeScript（可选，如果需要使用 TypeScript）</h3><h4 id="安装相关依赖"><a href="#安装相关依赖" class="headerlink" title="安装相关依赖"></a>安装相关依赖</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install typescript -D</span><br></pre></td></tr></table></figure>
+<h4 id="配置tsconfig"><a href="#配置tsconfig" class="headerlink" title="配置tsconfig"></a>配置tsconfig</h4><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;compilerOptions&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;target&quot;</span><span class="punctuation">:</span> <span class="string">&quot;es5&quot;</span><span class="punctuation">,</span>  <span class="comment">// 编译后的 JavaScript 代码目标版本为 ES5。</span></span><br><span class="line">    <span class="attr">&quot;module&quot;</span><span class="punctuation">:</span> <span class="string">&quot;esnext&quot;</span><span class="punctuation">,</span>  <span class="comment">// 设置模块系统为 ESNext。</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 输出的目录</span></span><br><span class="line">    <span class="attr">&quot;outDir&quot;</span><span class="punctuation">:</span> <span class="string">&quot;./lib&quot;</span><span class="punctuation">,</span>  <span class="comment">// 编译后的 JavaScript 和类型声明文件输出到 `lib` 目录。可以根据需要调整为其他目录名。</span></span><br><span class="line">    </span><br><span class="line">    <span class="attr">&quot;strict&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span>  <span class="comment">// 启用 TypeScript 的严格类型检查模式。</span></span><br><span class="line">    </span><br><span class="line">    <span class="attr">&quot;noImplicitAny&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span>  <span class="comment">// 允许隐式 `any` 类型。</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 模块的解析策略</span></span><br><span class="line">    <span class="attr">&quot;moduleResolution&quot;</span><span class="punctuation">:</span> <span class="string">&quot;node&quot;</span><span class="punctuation">,</span>  <span class="comment">// 设置模块解析方式为 `node`。</span></span><br><span class="line">    </span><br><span class="line">    <span class="attr">&quot;esModuleInterop&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span>  <span class="comment">// 允许使用 CommonJS 模块的默认导入（即 `require`），并使其能够以 ES6 模块的语法进行导入。</span></span><br><span class="line">    </span><br><span class="line">    <span class="attr">&quot;skipLibCheck&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span>  <span class="comment">// 跳过库文件的类型检查。这可以提高编译速度，特别是对于包含大量类型定义的第三方库。</span></span><br><span class="line">    </span><br><span class="line">    <span class="attr">&quot;forceConsistentCasingInFileNames&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span>  <span class="comment">// 强制文件名的大小写一致性。</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 只生成类型文件，不转换代码</span></span><br><span class="line">    <span class="attr">&quot;declaration&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span>  <span class="comment">// 启用类型声明文件的生成，生成 `.d.ts` 文件。</span></span><br><span class="line">    </span><br><span class="line">    <span class="attr">&quot;emitDeclarationOnly&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span>  <span class="comment">// 只生成类型声明文件，不生成 JavaScript 代码。这通常用于只发布类型声明的库。</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 只编译 src 目录下的文件</span></span><br><span class="line">  <span class="attr">&quot;include&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="string">&quot;src&quot;</span> </span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  </span><br><span class="line">  <span class="attr">&quot;exclude&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="string">&quot;tests&quot;</span>  <span class="comment">// 排除 `tests` 目录下的文件不进行编译。</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="2-ESLint（代码规范检查）"><a href="#2-ESLint（代码规范检查）" class="headerlink" title="2. ESLint（代码规范检查）"></a>2. ESLint（代码规范检查）</h3><h4 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install eslint @eslint/js globals -D</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>@eslint&#x2F;js:<br>ESLint 的一个扩展包，包含了一组新的 JavaScript 编码规则，用于在项目中启用和定制特定的 JavaScript 规则（例如：ES6+ 语法支持、代码风格等）。</p>
+</li>
+<li><p>globals:<br>包含了常见 JavaScript 环境中预定义的全局变量列表。例如，浏览器环境中的 window 和 document，或者 Node.js 中的 process 和 Buffer 等。</p>
+</li>
+</ul>
+<p>若项目使用了ts,需要同步安装以下依赖</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install eslint -D</span><br></pre></td></tr></table></figure>
+<h4 id="配置eslint-config-js"><a href="#配置eslint-config-js" class="headerlink" title="配置eslint.config.js"></a>配置eslint.config.js</h4><p>在根目录新建eslint.config.js</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> globals <span class="keyword">from</span> <span class="string">&quot;globals&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> pluginJs <span class="keyword">from</span> <span class="string">&quot;@eslint/js&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> tseslint <span class="keyword">from</span> <span class="string">&quot;typescript-eslint&quot;</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/** <span class="doctag">@type</span> &#123;<span class="type">import(&#x27;eslint&#x27;).Linter.Config[]</span>&#125; */</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> [</span><br><span class="line">  &#123;<span class="attr">files</span>: [<span class="string">&quot;**/*.&#123;js,mjs,cjs,ts&#125;&quot;</span>]&#125;,</span><br><span class="line">  &#123;<span class="attr">languageOptions</span>: &#123; <span class="attr">globals</span>: globals.<span class="property">browser</span> &#125;&#125;,</span><br><span class="line">  pluginJs.<span class="property">configs</span>.<span class="property">recommended</span>,</span><br><span class="line">  ...tseslint.<span class="property">configs</span>.<span class="property">recommended</span>,</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
+<h3 id="3-Rollup-配置（打包工具）"><a href="#3-Rollup-配置（打包工具）" class="headerlink" title="3. Rollup 配置（打包工具）"></a>3. Rollup 配置（打包工具）</h3><h4 id="安装rollup相关依赖"><a href="#安装rollup相关依赖" class="headerlink" title="安装rollup相关依赖"></a>安装rollup相关依赖</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install rollup @rollup/plugin-commonjs @rollup/plugin-node-resolve @rollup/plugin-typescript -D</span><br></pre></td></tr></table></figure>
+<ul>
+<li>@rollup&#x2F;plugin-commonjs<br>这个插件用于将 CommonJS 模块转换为 ES 模块，使得 Rollup 可以处理和打包 CommonJS 格式的第三方库（例如 Node.js 模块）。<br>创建 rollup.config.js 文件，配置如何打包你的包。</li>
+<li>@rollup&#x2F;plugin-node-resolve<br>这个插件让Rollup 能够正确解析并打包外部的依赖（例如：你安装的 npm 包），而不需要显式地指定模块路径</li>
+<li>@rollup&#x2F;plugin-typescript<br>这个插件用于让 Rollup 处理 TypeScript 文件（.ts 和 .tsx）。此插件会使用 tsc（TypeScript 编译器）来编译 TypeScript 文件，并生成相应的 JavaScript 文件。</li>
+</ul>
+<h4 id="配置rollup"><a href="#配置rollup" class="headerlink" title="配置rollup"></a>配置rollup</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// rollup.config.js</span></span><br><span class="line"><span class="keyword">import</span> resolve <span class="keyword">from</span> <span class="string">&#x27;@rollup/plugin-node-resolve&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> typescript <span class="keyword">from</span> <span class="string">&#x27;@rollup/plugin-typescript&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> commonjs <span class="keyword">from</span> <span class="string">&#x27;@rollup/plugin-commonjs&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> pkg <span class="keyword">from</span> <span class="string">&#x27;./package.json&#x27;</span> assert &#123; <span class="attr">type</span>: <span class="string">&#x27;json&#x27;</span> &#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> footer = <span class="string">`</span></span><br><span class="line"><span class="string">if (typeof window !== &#x27;undefined&#x27;) &#123;</span></span><br><span class="line"><span class="string">  window._Dry_VERSION_ = &#x27;<span class="subst">$&#123;pkg.version&#125;</span>&#x27;</span></span><br><span class="line"><span class="string">&#125;`</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">  <span class="attr">input</span>: <span class="string">&#x27;./src/index.ts&#x27;</span>,<span class="comment">//input 配置指定了打包的入口文件。</span></span><br><span class="line">  <span class="attr">output</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">file</span>: pkg.<span class="property">main</span>,</span><br><span class="line">      <span class="attr">format</span>: <span class="string">&#x27;cjs&#x27;</span>,<span class="comment">// 输出一个 CommonJS 格式的文件，适合在 Node.js 环境中使用。该文件会被存储在 pkg.main 指定的路径中。</span></span><br><span class="line">      footer,</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">file</span>: pkg.<span class="property">module</span>,</span><br><span class="line">      <span class="attr">format</span>: <span class="string">&#x27;esm&#x27;</span>,<span class="comment">// 输出一个 ES模块 格式的文件，适用于现代 JavaScript 环境（包括浏览器和支持 ES模块的 Node.js）。</span></span><br><span class="line">      footer,</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">file</span>: pkg.<span class="property">browser</span>,</span><br><span class="line">      <span class="attr">format</span>: <span class="string">&#x27;umd&#x27;</span>,<span class="comment">// 输出一个 UMD 格式的文件，适合在浏览器和 Node.js 环境中使用（即兼容浏览器、Node.js 和 AMD 模块系统）。该文件会被存储在 pkg.browser 指定的路径中。</span></span><br><span class="line">      <span class="attr">name</span>: <span class="string">&#x27;Dry&#x27;</span>,<span class="comment">// &#x27;Dry&#x27; 是指在浏览器环境下，UMD 模块会暴露一个全局变量 Dry，它指向模块的导出。</span></span><br><span class="line">      footer,<span class="comment">// 在每个输出格式的文件结尾加上 footer 中定义的代码，以便在浏览器中使用时将版本号暴露给全局变量</span></span><br><span class="line">    &#125;,</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">plugins</span>: [</span><br><span class="line">    <span class="title function_">typescript</span>(),</span><br><span class="line">    <span class="title function_">commonjs</span>(),</span><br><span class="line">    <span class="title function_">resolve</span>(),</span><br><span class="line">  ],</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-Jest（单元测试）"><a href="#4-Jest（单元测试）" class="headerlink" title="4. Jest（单元测试）"></a>4. Jest（单元测试）</h3><h4 id="安装-Jest："><a href="#安装-Jest：" class="headerlink" title="安装 Jest："></a>安装 Jest：</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install jest ts-jest @types/jest -D</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li><p>配置jest<br>在根路径下新建jest.config.js</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// jest.config.js</span></span><br><span class="line"><span class="comment">/** <span class="doctag">@type</span> &#123;<span class="type">import(&#x27;ts-jest&#x27;).JestConfigWithTsJest</span>&#125; **/</span></span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = &#123;</span><br><span class="line">  <span class="attr">testEnvironment</span>: <span class="string">&quot;node&quot;</span>,</span><br><span class="line">  <span class="attr">transform</span>: &#123;</span><br><span class="line">    <span class="string">&quot;^.+.tsx?$&quot;</span>: [<span class="string">&quot;ts-jest&quot;</span>,&#123;&#125;],</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>编写测试文件</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/__tests__/add.test.js</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> &#123; add &#125; = <span class="built_in">require</span>(<span class="string">&#x27;../index&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="title function_">test</span>(<span class="string">&#x27;adds 1 + 2 to equal 3&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="title function_">expect</span>(<span class="title function_">add</span>(<span class="number">1</span>, <span class="number">2</span>)).<span class="title function_">toBe</span>(<span class="number">3</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></li>
+<li><p>在 package.json 中配置构建脚本</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;scripts&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;test&quot;</span><span class="punctuation">:</span> <span class="string">&quot;jest&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="编写包的核心代码"><a href="#编写包的核心代码" class="headerlink" title="编写包的核心代码"></a>编写包的核心代码</h2><p>创建一个 src 文件夹来存放源代码。比如，创建一个 src&#x2F;index.ts 文件<br>示例代码（一个简单的函数）</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/index.ts</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Adds two numbers</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">number</span>&#125; <span class="variable">a</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">number</span>&#125; <span class="variable">b</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@returns</span> &#123;<span class="type">number</span>&#125; <span class="variable">sum</span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">add</span>(<span class="params">a:<span class="built_in">number</span>, b:<span class="built_in">number</span></span>):<span class="built_in">number</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = &#123; add &#125;;</span><br></pre></td></tr></table></figure>
+
+<h1 id="打包并生成类型声明文件"><a href="#打包并生成类型声明文件" class="headerlink" title="打包并生成类型声明文件"></a>打包并生成类型声明文件</h1><ol>
+<li>在 package.json 中配置构建脚本，使用 Rollup 来打包代码。<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;scripts&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;build&quot;</span><span class="punctuation">:</span> <span class="string">&quot;rollup -c&quot;</span><span class="punctuation">,</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></li>
+<li>构建运行与测试<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm run build  <span class="comment"># 打包项目</span></span><br><span class="line">npm <span class="built_in">test</span>       <span class="comment"># 运行测试</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h1 id="配置-package-json，准备发布"><a href="#配置-package-json，准备发布" class="headerlink" title="配置 package.json，准备发布"></a>配置 package.json，准备发布</h1><p>在 package.json 中配置必要的字段，确保包的名称、版本、入口文件等都设置正确。重要字段包括：</p>
+<ul>
+<li>name：包的名称，必须是唯一的。</li>
+<li>version：遵循语义版本控制（SemVer），如 1.0.0。</li>
+<li>main：CommonJS 入口文件。</li>
+<li>module：ESM 入口文件。</li>
+<li>types：类型声明文件的位置（如果使用 TypeScript）。</li>
+<li>files：发布时包含的文件或文件夹，通常包括 dist、lib 等。<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;my-npm-package&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.0.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;main&quot;</span><span class="punctuation">:</span> <span class="string">&quot;dist/bundle.cjs.js&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;module&quot;</span><span class="punctuation">:</span> <span class="string">&quot;dist/bundle.esm.js&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;types&quot;</span><span class="punctuation">:</span> <span class="string">&quot;dist/index.d.ts&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;files&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="string">&quot;dist&quot;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="可供参考的package-json配置"><a href="#可供参考的package-json配置" class="headerlink" title="可供参考的package.json配置"></a>可供参考的package.json配置</h2><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;your-package-name&quot;</span><span class="punctuation">,</span>  <span class="comment">// 包的名称，必须是唯一的，格式支持 scoped 包（如 @scope/package-name）</span></span><br><span class="line">  <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.0.0&quot;</span><span class="punctuation">,</span>  <span class="comment">// 包的版本号，遵循语义版本控制（SemVer）</span></span><br><span class="line">  <span class="attr">&quot;main&quot;</span><span class="punctuation">:</span> <span class="string">&quot;lib/bundle.cjs.js&quot;</span><span class="punctuation">,</span>  <span class="comment">// CommonJS 模块的入口文件，用于 Node.js 环境中的 `require`</span></span><br><span class="line">  <span class="attr">&quot;module&quot;</span><span class="punctuation">:</span> <span class="string">&quot;lib/bundle.esm.js&quot;</span><span class="punctuation">,</span>  <span class="comment">// ES 模块的入口文件，用于现代 JS 环境中的 `import`</span></span><br><span class="line">  <span class="attr">&quot;browser&quot;</span><span class="punctuation">:</span> <span class="string">&quot;lib/bundle.browser.js&quot;</span><span class="punctuation">,</span>  <span class="comment">// 浏览器环境的入口文件，通常用于前端项目</span></span><br><span class="line">  <span class="attr">&quot;types&quot;</span><span class="punctuation">:</span> <span class="string">&quot;types/index.d.ts&quot;</span><span class="punctuation">,</span>  <span class="comment">// TypeScript 类型声明文件的位置，帮助 TypeScript 用户了解该包的类型</span></span><br><span class="line">  <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;module&quot;</span><span class="punctuation">,</span>  <span class="comment">// 指定模块系统为 ES Modules (ESM)</span></span><br><span class="line">  <span class="attr">&quot;files&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>  <span class="comment">// 定义要包括在发布包中的文件，这里指定了 lib 文件夹</span></span><br><span class="line">    <span class="string">&quot;lib&quot;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;engines&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;node&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&gt;=14.0.0&quot;</span><span class="comment">//规定了包支持的 Node.js 版本。避免用户安装在不兼容的 Node.js 版本中。</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;repository&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span>  <span class="comment">// 包的源代码仓库信息，通常用于指向 GitHub 或 GitLab 仓库</span></span><br><span class="line">    <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;git&quot;</span><span class="punctuation">,</span>  <span class="comment">// 仓库类型</span></span><br><span class="line">    <span class="attr">&quot;url&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span>  <span class="comment">// 仓库 URL，这里需要填写你的代码仓库地址</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;homepage&quot;</span><span class="punctuation">:</span><span class="string">&quot;&quot;</span><span class="punctuation">,</span><span class="comment">//包的主页，可以是 GitHub 页面或文档页面等</span></span><br><span class="line">  <span class="attr">&quot;exports&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span>  <span class="comment">// 定义包对外提供的模块导出格式，适应不同环境（Node.js、浏览器）</span></span><br><span class="line">    <span class="attr">&quot;.&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;import&quot;</span><span class="punctuation">:</span> <span class="string">&quot;./lib/bundle.esm.js&quot;</span><span class="punctuation">,</span>  <span class="comment">// ESM 模块的导出路径</span></span><br><span class="line">      <span class="attr">&quot;require&quot;</span><span class="punctuation">:</span> <span class="string">&quot;./lib/bundle.cjs.js&quot;</span>  <span class="comment">// CommonJS 模块的导出路径</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;./browser&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;browser&quot;</span><span class="punctuation">:</span> <span class="string">&quot;./lib/bundle.browser.js&quot;</span>  <span class="comment">// 浏览器环境下的导出路径</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;scripts&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span>  <span class="comment">// 定义可以执行的脚本命令</span></span><br><span class="line">    <span class="attr">&quot;build&quot;</span><span class="punctuation">:</span> <span class="string">&quot;rollup -c&quot;</span><span class="punctuation">,</span>  <span class="comment">// 执行构建任务，使用 Rollup 打包项目</span></span><br><span class="line">    <span class="attr">&quot;build:types&quot;</span><span class="punctuation">:</span> <span class="string">&quot;tsc&quot;</span><span class="punctuation">,</span>  <span class="comment">// 生成 TypeScript 类型声明文件</span></span><br><span class="line">    <span class="attr">&quot;test&quot;</span><span class="punctuation">:</span> <span class="string">&quot;jest&quot;</span><span class="punctuation">,</span>  <span class="comment">// 执行测试命令，使用 Jest 进行测试</span></span><br><span class="line">    <span class="attr">&quot;publish&quot;</span><span class="punctuation">:</span> <span class="string">&quot;npm publish&quot;</span>  <span class="comment">// 执行发布任务，使用 npm 将包发布到 NPM Registry</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;author&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span>  <span class="comment">// 包的作者信息，通常是作者的名字或联系方式</span></span><br><span class="line">  <span class="attr">&quot;license&quot;</span><span class="punctuation">:</span> <span class="string">&quot;ISC&quot;</span><span class="punctuation">,</span>  <span class="comment">// 包的开源许可证类型，通常是 `MIT` 或 `ISC` 等</span></span><br><span class="line">  <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span>  <span class="comment">// 包的简短描述，说明包的用途</span></span><br><span class="line">  <span class="attr">&quot;keywords&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>  <span class="comment">// 包的关键词，帮助用户通过搜索找到你的包</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;devDependencies&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span>  <span class="comment">// 开发依赖，包含用于开发、构建和测试的依赖</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;dependencies&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span>  <span class="comment">// 运行时依赖，包含包正常运行所需要的依赖</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;peerDependencies&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="comment">// 声明包所依赖的其他包版本</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<h1 id="发布包到-npm-registry"><a href="#发布包到-npm-registry" class="headerlink" title="发布包到 npm registry"></a>发布包到 npm registry</h1><ol>
+<li>在发布之前，确保已经注册了一个 npm 账户，并在终端中登录<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm login</span><br></pre></td></tr></table></figure></li>
+<li>发布包<br>运行以下命令来发布包：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm publish</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h1 id="根据需求更新版本并继续发布更新"><a href="#根据需求更新版本并继续发布更新" class="headerlink" title="根据需求更新版本并继续发布更新"></a>根据需求更新版本并继续发布更新</h1><p>如果需要发布更新，修改代码后增大版本号（遵循 SemVer），然后执行以下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm version patch   <span class="comment"># 或者 minor/major，根据更改的内容</span></span><br><span class="line">npm publish</span><br></pre></td></tr></table></figure>
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>发布一个 npm 包的完整流程如下：</p>
+<ol>
+<li>创建并初始化项目。</li>
+<li>配置开发工具（如 Rollup、TypeScript、Jest 等）并编写源代码。</li>
+<li>编写单元测试，确保代码的质量。</li>
+<li>打包并生成类型声明文件（如果使用 TypeScript）。</li>
+<li>配置 package.json，准备发布。</li>
+<li>发布包到 npm registry。</li>
+<li>根据需求更新版本并继续发布更新</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/zzoeyh">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E5%B9%B6%E5%88%9D%E5%A7%8B%E5%8C%96%E9%A1%B9%E7%9B%AE"><span class="toc-number">1.</span> <span class="toc-text">创建并初始化项目</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BC%96%E5%86%99%E6%BA%90%E4%BB%A3%E7%A0%81%E5%B9%B6%E9%85%8D%E7%BD%AE%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7"><span class="toc-number">2.</span> <span class="toc-text">编写源代码并配置开发工具</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E5%BC%80%E5%8F%91%E7%9B%B8%E5%85%B3%E4%BE%9D%E8%B5%96"><span class="toc-number">2.1.</span> <span class="toc-text">配置开发相关依赖</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-TypeScript%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%8C%E5%A6%82%E6%9E%9C%E9%9C%80%E8%A6%81%E4%BD%BF%E7%94%A8-TypeScript%EF%BC%89"><span class="toc-number">2.1.1.</span> <span class="toc-text">1. TypeScript（可选，如果需要使用 TypeScript）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E7%9B%B8%E5%85%B3%E4%BE%9D%E8%B5%96"><span class="toc-number">2.1.1.1.</span> <span class="toc-text">安装相关依赖</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEtsconfig"><span class="toc-number">2.1.1.2.</span> <span class="toc-text">配置tsconfig</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-ESLint%EF%BC%88%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83%E6%A3%80%E6%9F%A5%EF%BC%89"><span class="toc-number">2.1.2.</span> <span class="toc-text">2. ESLint（代码规范检查）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96"><span class="toc-number">2.1.2.1.</span> <span class="toc-text">安装依赖</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEeslint-config-js"><span class="toc-number">2.1.2.2.</span> <span class="toc-text">配置eslint.config.js</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Rollup-%E9%85%8D%E7%BD%AE%EF%BC%88%E6%89%93%E5%8C%85%E5%B7%A5%E5%85%B7%EF%BC%89"><span class="toc-number">2.1.3.</span> <span class="toc-text">3. Rollup 配置（打包工具）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85rollup%E7%9B%B8%E5%85%B3%E4%BE%9D%E8%B5%96"><span class="toc-number">2.1.3.1.</span> <span class="toc-text">安装rollup相关依赖</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AErollup"><span class="toc-number">2.1.3.2.</span> <span class="toc-text">配置rollup</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Jest%EF%BC%88%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%EF%BC%89"><span class="toc-number">2.1.4.</span> <span class="toc-text">4. Jest（单元测试）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-Jest%EF%BC%9A"><span class="toc-number">2.1.4.1.</span> <span class="toc-text">安装 Jest：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E5%86%99%E5%8C%85%E7%9A%84%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81"><span class="toc-number">2.2.</span> <span class="toc-text">编写包的核心代码</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%93%E5%8C%85%E5%B9%B6%E7%94%9F%E6%88%90%E7%B1%BB%E5%9E%8B%E5%A3%B0%E6%98%8E%E6%96%87%E4%BB%B6"><span class="toc-number">3.</span> <span class="toc-text">打包并生成类型声明文件</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE-package-json%EF%BC%8C%E5%87%86%E5%A4%87%E5%8F%91%E5%B8%83"><span class="toc-number">4.</span> <span class="toc-text">配置 package.json，准备发布</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%AF%E4%BE%9B%E5%8F%82%E8%80%83%E7%9A%84package-json%E9%85%8D%E7%BD%AE"><span class="toc-number">4.1.</span> <span class="toc-text">可供参考的package.json配置</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%91%E5%B8%83%E5%8C%85%E5%88%B0-npm-registry"><span class="toc-number">5.</span> <span class="toc-text">发布包到 npm registry</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A0%B9%E6%8D%AE%E9%9C%80%E6%B1%82%E6%9B%B4%E6%96%B0%E7%89%88%E6%9C%AC%E5%B9%B6%E7%BB%A7%E7%BB%AD%E5%8F%91%E5%B8%83%E6%9B%B4%E6%96%B0"><span class="toc-number">6.</span> <span class="toc-text">根据需求更新版本并继续发布更新</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&text=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&title=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&is_video=false&description=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=从0到1开发并发布一个npm包的流程以及注意事项&body=Check out this article: https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&title=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&title=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&title=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&title=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&name=从0到1开发并发布一个npm包的流程以及注意事项&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://zzoeyh.github.io/2024/12/29/2024/npm-pkg-notice/&t=从0到1开发并发布一个npm包的流程以及注意事项"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    Zoey Hong
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/zzoeyh">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
